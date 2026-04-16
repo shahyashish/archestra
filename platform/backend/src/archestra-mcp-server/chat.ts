@@ -13,6 +13,7 @@ import {
   ConversationModel,
   OrganizationModel,
   ScheduleTriggerRunModel,
+  UserMemoryModel,
 } from "@/models";
 import { resolveConversationLlmSelectionForAgent } from "@/utils/llm-resolution";
 import {
@@ -180,11 +181,17 @@ const registry = defineArchestraTools([
           context.userId &&
           context.organizationId
         ) {
+          //Load user memory before updating artifact
+          const userMemory = await UserMemoryModel.getMemory(
+            context.userId,
+            context.organizationId,
+          );
+
           const updated = await ConversationModel.update(
             context.conversationId,
             context.userId,
             context.organizationId,
-            { artifact: args.content },
+            { artifact: args.content, userMemory: userMemory },
           );
 
           if (!updated) {
